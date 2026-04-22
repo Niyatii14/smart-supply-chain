@@ -3,7 +3,7 @@ import joblib
 
 app = FastAPI()
 
-model = joblib.load("model/model.pkl")
+model = joblib.load("backend/model/model.pkl")
 
 @app.get("/")
 def home():
@@ -15,6 +15,28 @@ def predict(data: dict):
     weather = data["weather"]
     traffic = data["traffic"]
 
-    prediction = model.predict([[distance, weather, traffic]])
+    input_data = [[distance, weather, traffic]]
 
-    return {"delay": int(prediction[0])}
+    prediction = model.predict(input_data)
+    probability = model.predict_proba(input_data)[0][1]
+
+    if probability < 0.4:
+        risk = "Low"
+    elif probability < 0.7:
+        risk = "Medium"
+    else:
+        risk = "High"
+
+    if risk == "Low":
+        suggestion = "Continue normal route"
+    elif risk == "Medium":
+        suggestion = "Monitor shipment and prepare backup route"
+    else:
+        suggestion = "Dispatch early or reroute immediately"
+
+    return {
+        "delay": int(prediction[0]),
+        "delay_probability": round(float(probability), 2),
+        "risk_level": risk,
+        "suggestion": suggestion
+    }
