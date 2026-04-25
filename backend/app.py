@@ -1,42 +1,57 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import joblib
+from services.maps_service import get_distance
+from services.weather_service import get_weather
+from services.traffic_service import get_traffic
+from utils.preprocess import preprocess
 
 app = FastAPI()
 
-model = joblib.load("backend/model/model.pkl")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.get("/")
-def home():
-    return {"message": "API is working"}
+model = joblib.load("model/model.pkl")
+
 
 @app.post("/predict")
 def predict(data: dict):
-    distance = data["distance"]
-    weather = data["weather"]
-    traffic = data["traffic"]
+    source = data["source"]
+    destination = data["destination"]
 
-    input_data = [[distance, weather, traffic]]
+    # 🔹 Get real/simulated data
+    distance = get_distance(source, destination)
+    weather = get_weather(destination)
+    traffic = get_traffic(source, destination)
 
+    # 🔹 Preprocess
+    input_data = preprocess(distance, weather, traffic)
+
+    # 🔹 ML prediction
     prediction = model.predict(input_data)
     probability = model.predict_proba(input_data)[0][1]
 
+    # 🔹 Risk logic
     if probability < 0.4:
         risk = "Low"
+        suggestion = "Continue normal route"
     elif probability < 0.7:
         risk = "Medium"
+        suggestion = "Monitor route"
     else:
         risk = "High"
-
-    if risk == "Low":
-        suggestion = "Continue normal route"
-    elif risk == "Medium":
-        suggestion = "Monitor shipment and prepare backup route"
-    else:
-        suggestion = "Dispatch early or reroute immediately"
+        suggestion = "Reroute or dispatch early"
 
     return {
-        "delay": int(prediction[0]),
+        "distance": distance,
+        "weather": weather,
+        "traffic": traffic,
         "delay_probability": round(float(probability), 2),
-        "risk_level": risk,
+        "risk": risk,
         "suggestion": suggestion
     }
