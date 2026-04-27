@@ -1,6 +1,10 @@
 import requests
+import os
+from dotenv import load_dotenv
 
-GOOGLE_API_KEY = "AIzaSyCKBV6tjJ_oLVPsvJP_HVvoR1sCYz5NyBA"
+load_dotenv()
+
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 def get_distance_eta(source, destination):
     try:
