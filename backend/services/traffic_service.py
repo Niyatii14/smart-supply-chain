@@ -9,3 +9,6 @@ def get_traffic(source, destination):
         return "high"
     else:
         return "medium"
+    
+
+    
