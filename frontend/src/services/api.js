@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE = "http://127.0.0.1:8000";
+const BASE = "https://logistic-mitra.onrender.com";
 
 export const predictRoute = async (data) => {
   const res = await axios.post(`${BASE}/predict`, data);
