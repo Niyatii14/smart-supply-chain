@@ -2,11 +2,18 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import joblib
 import os
-
-from backend.services.map_service import get_distance_eta
-from backend.services.weather_service import get_weather
-from backend.services.traffic_service import get_traffic
-from backend.utils.preprocess import preprocess
+try:
+    # For Render (inside backend)
+    from services.map_service import get_distance_eta
+    from services.weather_service import get_weather
+    from services.traffic_service import get_traffic
+    from utils.preprocess import preprocess
+except:
+    # For local (from project root)
+    from backend.services.map_service import get_distance_eta
+    from backend.services.weather_service import get_weather
+    from backend.services.traffic_service import get_traffic
+    from backend.utils.preprocess import preprocess
 
 app = FastAPI(title="Logistics Mitra API")
 
