@@ -2,18 +2,42 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import joblib
 import os
-try:
-    # For Render (inside backend)
-    from services.map_service import get_distance_eta
-    from services.weather_service import get_weather
-    from services.traffic_service import get_traffic
-    from utils.preprocess import preprocess
-except:
-    # For local (from project root)
-    from backend.services.map_service import get_distance_eta
-    from backend.services.weather_service import get_weather
-    from backend.services.traffic_service import get_traffic
-    from backend.utils.preprocess import preprocess
+
+def load_dotenv(path: str = ".env"):
+    if not os.path.isfile(path):
+        return
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+
+load_dotenv()
+# try:
+#     # For Render (inside backend)
+#     from services.map_service import get_distance_eta
+#     from services.weather_service import get_weather
+#     from services.traffic_service import get_traffic
+#     from utils.preprocess import preprocess
+# except:
+#     # For local (from project root)
+#     from services.map_service import get_distance_eta
+#     from services.weather_service import get_weather
+#     from services.traffic_service import get_traffic
+#     from utils.preprocess import preprocess
+
+from services.data_service import get_random_route
+from services.map_service import get_distance_eta
+from services.weather_service import get_weather
+from services.traffic_service import get_traffic
+from utils.preprocess import preprocess
 
 app = FastAPI(title="Logistics Mitra API")
 
@@ -42,9 +66,19 @@ def home():
 
 @app.post("/predict")
 def predict(data: dict):
-    source      = data.get("source", "")
-    destination = data.get("destination", "")
-    cargo_type  = data.get("cargo_type", "general")
+    
+    from services.data_service import get_random_route   # 👈 add here
+
+    try:
+        if not data.get("source") or not data.get("destination"):
+            source, destination = get_random_route()
+        else:
+            source = data.get("source")
+            destination = data.get("destination")
+    except:
+        source, destination = "Delhi", "Mumbai"
+
+    cargo_type = data.get("cargo_type", "general")
 
     # ── Real API calls ──
     distance, eta = get_distance_eta(source, destination)
@@ -155,6 +189,10 @@ def predict(data: dict):
         "alternatives":      alternatives,
     }
 
+@app.get("/test-data")
+def test_data():
+    from services.data_service import get_dataset_info
+    return get_dataset_info()
 
 @app.get("/alerts")
 def get_alerts():
@@ -186,4 +224,20 @@ def get_shipments():
             {"id": "LM-0035", "route": "HYD → CHN", "status": "delayed",    "eta": "4h 45m"},
             {"id": "LM-0031", "route": "PNE → GWL", "status": "on-time",    "eta": "8h 05m"},
         ]
+    }
+
+# from services.data_service import get_route_from_data
+
+# data_sample = get_route_from_data()
+
+# source = data_sample["source"]
+# destination = data_sample["destination"]
+
+@app.get("/sample-data")
+def sample_data():
+    from services.data_service import get_random_route
+    source, destination = get_random_route()
+    return {
+        "source": source,
+        "destination": destination
     }
