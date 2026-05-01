@@ -7,8 +7,10 @@ DATA_PATH = os.path.join(
     os.path.dirname(__file__),
     "..",
     "data",
-    "DataCoSupplyChainDataset.csv"
+    # "DataCoSupplyChainDataset.csv"
+    "sample.csv"
 )
+# DATA_PATH = "backend/sample.csv"
 
 # Load dataset once
 df = pd.read_csv(DATA_PATH, encoding="latin1")

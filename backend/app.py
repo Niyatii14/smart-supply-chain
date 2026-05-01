@@ -226,12 +226,12 @@ def get_shipments():
         ]
     }
 
-# from services.data_service import get_route_from_data
+from services.data_service import get_route_from_data
 
-# data_sample = get_route_from_data()
+data_sample = get_route_from_data()
 
-# source = data_sample["source"]
-# destination = data_sample["destination"]
+source = data_sample["source"]
+destination = data_sample["destination"]
 
 @app.get("/sample-data")
 def sample_data():
