@@ -457,7 +457,8 @@ export default function RouteAnalysis() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 16 }}>
                   {[
                     { label: 'Distance', value: result.distance ? `${result.distance} km` : '—', icon: 'straighten', color: 'var(--cyan)' },
-                    { label: 'Estimated ETA', value: result.eta_hours ? `${result.eta_hours}h` : (result.eta || '—'), icon: 'schedule', color: '#ffb300' },
+                    // { label: 'Estimated ETA', value: result.eta_hours ? `${result.eta_hours}h` : (result.eta || '—'), icon: 'schedule', color: '#ffb300' },
+                    { label: 'Estimated ETA', value: result.eta || result.eta_hours || '—', icon: 'schedule', color: '#ffb300' },
                     { label: 'Risk Score', value: result.risk_score || result.risk_level || '—', icon: 'assessment', color: risk.color },
                   ].map(s => (
                     <div key={s.label} style={{

@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import math
+import random
 
 # Correct path to CSV
 DATA_PATH = os.path.join(
@@ -25,24 +26,48 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
     return R * c
 
+# def get_distance_from_data(source, destination):
+#     try:
+#         src = df[df["Order City"].str.lower().str.contains(source.lower())]
+#         dst = df[df["Customer City"].str.lower().str.contains(destination.lower())]
+
+#         if len(src) == 0 or len(dst) == 0:
+#             raise Exception("City not found")
+
+#         import random
+#         base = random.randint(100, 1500)
+
+#         return base
+
+#     except Exception as e:
+#         print("DATASET FAILED:", e)
+
+#         import random
+#         return random.randint(200, 1200)
+
 def get_distance_from_data(source, destination):
     try:
-        src = df[df["Order City"].str.lower().str.contains(source.lower())]
-        dst = df[df["Customer City"].str.lower().str.contains(destination.lower())]
-
-        if len(src) == 0 or len(dst) == 0:
-            raise Exception("City not found")
-
-        import random
-        base = random.randint(100, 1500)
-
-        return base
-
+        # City coordinates se actual distance calculate karo
+        from services.map_service import CITY_COORDS, get_coords
+        
+        src_coords = get_coords(source)
+        dst_coords = get_coords(destination)
+        
+        if src_coords and dst_coords:
+            # Haversine distance
+            dist = calculate_distance(
+                src_coords[1], src_coords[0],  # lat, lon
+                dst_coords[1], dst_coords[0]
+            )
+            # Road distance ~1.3x straight line
+            return round(dist * 1.3, 2)
+        
+        raise Exception("Coords not found")
+        
     except Exception as e:
         print("DATASET FAILED:", e)
-
-        import random
-        return random.randint(200, 1200)
+        # Last resort fallback
+        return random.randint(200, 800)
     
 # ✅ Function 1: Get random route
 def get_random_route():
