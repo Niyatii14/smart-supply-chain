@@ -120,7 +120,7 @@
 //   return response.json();
 // }
 
-const BASE_URL = 'http://localhost:8000'; // ← yeh mat chhuona
+const BASE_URL = 'https://logistic-mitra.onrender.com';
 
 export async function predictRoute({ source, destination, cargo_type = 'General' }) {
   const [aiRes, distRes] = await Promise.allSettled([
